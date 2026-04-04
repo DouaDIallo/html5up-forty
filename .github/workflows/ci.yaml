@@ -8,7 +8,7 @@ on:
 env:
   IMAGE_NAME: webapp-ci-cd
   IMAGE_TAG: 1.0.1
-  DOCKER_REGISTRY: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKER_REGISTRY: ${{ secrets.DOCKERHUB_DouaDiallo }}
 
 jobs:
 
