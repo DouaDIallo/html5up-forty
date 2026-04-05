@@ -10,6 +10,9 @@ env:
   IMAGE_TAG: 1.0.1
 
 jobs:
+  # ===============================
+  # JOB 1 - CI : BUILD + PUSH
+  # ===============================
   ci:
     runs-on: ubuntu-latest
     steps:
@@ -22,15 +25,29 @@ jobs:
 
       - name: Build and Push
         run: |
-         
+          # On construit l'image avec ton pseudo Docker Hub
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+          # On l'envoie sur le registre
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
+  # ===============================
+  # JOB 2 - CD : DEPLOY
+  # ===============================
   deploy:
     needs: ci
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Remplace par runner-lab si tu utilises ton propre serveur
     steps:
+      # ÉTAPE CRUCIALE : Se reconnecter pour avoir le droit de faire le "pull"
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
       - name: Deploy Container
         run: |
+          # Maintenant le pull va fonctionner !
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          
+          # Nettoyage et relance
           docker stop ci-app || true
           docker rm ci-app || true
           docker run -d -p 80:80 --name ci-app ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
