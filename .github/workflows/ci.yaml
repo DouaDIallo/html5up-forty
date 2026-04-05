@@ -26,7 +26,7 @@ jobs:
 
   deploy:
     needs: ci
-    runs-on: runner-lab
+    runs-on: ubuntu-latest
     steps:
       - name: Deploy Container
         run: |
